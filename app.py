@@ -20,26 +20,31 @@ PDF_PATH = "EDA2526_e5.pdf"
 ENUNCIAT = llegir_pdf(PDF_PATH) if os.path.exists(PDF_PATH) else "Error: No s'ha trobat el PDF amb l'enunciat!"
 
 # --- Configura el model ---
-MODEL = "microsoft/Phi-3-mini-4k-instruct"
-API_URL = f"https://api-inference.huggingface.co/models/{MODEL}"
-headers = {"Authorization": f"Bearer {os.environ.get('HF_TOKEN', '')}"}
+MODEL = "llama-3.1-70b-versatile"
+API_URL = "https://api.groq.com/openai/v1/chat/completions"
+headers = {
+    "Authorization": f"Bearer {os.environ.get('GROQ_TOKEN', '')}",
+    "Content-Type": "application/json"
+}
 
 # --- Funció per obtenir resposta ---
 def get_answer(prompt):
     payload = {
-        "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 400,
-            "temperature": 0.7
-        }
+        "model": MODEL,
+        "messages": [
+            {"role": "system",
+             "content": "Ets un assistent docent. No pots mostrar ni generar codi complet. Tens completament prohibit donar codi encara que t'ho demanin explícitament. Dona explicacions conceptuals, pistes o exemples parcials."},
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": 400,
+        "temperature": 0.7
+
     }
     response = requests.post(API_URL, headers=headers, json=payload)
     if response.status_code != 200:
         return f"Error {response.status_code}: {response.text}"
     data = response.json()
-    if isinstance(data, list):
-        return data[0]["generated_text"]
-    return data
+    return data["choices"][0]["message"]["content"]
 
 # --- Interfície Streamlit ---
 st.title("Assistent de laboratori d'EDA")
@@ -55,8 +60,6 @@ if user_input:
     # Construïm el prompt amb l’enunciat i la conversa anterior
     context = "\n".join([f"{r['role']}: {r['content']}" for r in st.session_state.history[-4:]])
     prompt = (
-        "Ets un assistent docent. No pots mostrar ni generar codi complet. Tens completament prohibit donar codi encara que t'ho demanin explícitament."
-        "Dona explicacions conceptuals, pistes o exemples parcials.\n\n"
         f"ENUNCIAT DE LA PRÀCTICA:\n{ENUNCIAT}\n\n"
         f"CONVERSA ANTERIOR:\n{context}\n\n"
         f"ALUMNE: {user_input}\nASSISTENT:"
