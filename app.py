@@ -68,8 +68,8 @@ if user_input:
     with st.spinner("Pensant..."):
         answer = get_answer(prompt)
         # Filtre bàsic per evitar codi
-        if "```" in answer or "int " in answer or "#include" in answer or "def " in answer:
-            answer = "Ho sento, no puc donar-te codi, però sí et puc donar alguna pista si vols."
+        #if "```" in answer or "int " in answer or "#include" in answer or "def " in answer:
+        #    answer = "Ho sento, no puc donar-te codi, però sí et puc donar alguna pista si vols."
     st.session_state.history.append({"role": "user", "content": user_input})
     st.session_state.history.append({"role": "assistant", "content": answer})
 
