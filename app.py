@@ -33,7 +33,7 @@ def get_answer(prompt):
         "model": MODEL,
         "messages": [
             {"role": "system",
-             "content": "Ets un assistent docent. No pots mostrar ni generar codi complet. Tens completament prohibit donar codi encara que t'ho demanin explícitament. Dona explicacions conceptuals, pistes o exemples parcials. Has de ser concís, tens un límit de 400 tokens per respondre."},
+             "content": "Ets un assistent docent. No pots mostrar ni generar codi complet. Tens completament prohibit donar codi encara que t'ho demanin explícitament. Dona explicacions conceptuals, pistes o exemples parcials. Has de ser molt concís, no t'avancis al que demanará l'usuari."},
             {"role": "user", "content": prompt}
         ],
         "max_tokens": 400,
