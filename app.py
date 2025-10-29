@@ -111,6 +111,7 @@ with col2:
     if os.path.exists(os.path.join(carpeta, f"{st.session_state.selected}.pdf")):
         with open(os.path.join(carpeta, f"{st.session_state.selected}.pdf"), "rb") as f:
             pdf_bytes = f.read()
+        st.write("")
         st.download_button(
             label="Descarrega l'enunciat",
             data=pdf_bytes,
@@ -131,7 +132,6 @@ if f_enunciat_triat != st.session_state.selected:
     with col2:
         if st.button("❌ No, no vull perdre el xat"):
             # Reverteix el selectbox a la selecció antiga
-            st.session_state.selected = f_enunciat_actual
             st.session_state.selectbox_exercici = st.session_state.selected
             st.experimental_rerun()
             st.rerun()
