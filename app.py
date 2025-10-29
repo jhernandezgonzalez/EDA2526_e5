@@ -51,10 +51,6 @@ def llegir_enunciat(carpeta: str, nom_base: str) -> str:
 
 carpeta = "./enunciats"
 
-'''PDF_PATH = "EDA2526_e5.pdf"
-ENUNCIAT = llegir_pdf(PDF_PATH) if os.path.exists(PDF_PATH) else "Error: No s'ha trobat el PDF amb l'enunciat!"'''
-
-
 # --- Configura el model ---
 MODEL = "llama-3.3-70b-versatile"
 API_URL = "https://api.groq.com/openai/v1/chat/completions"
