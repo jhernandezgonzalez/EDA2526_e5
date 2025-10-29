@@ -97,8 +97,8 @@ if not f_enunciats:
 if "selected" not in st.session_state:
     st.session_state.selected = f_enunciats[0]
 
-if "cancelled_change" not in st.session_state:
-    st.session_state.cancelled_change = False
+#if "cancelled_change" not in st.session_state:
+#    st.session_state.cancelled_change = False
 
 col1, col2 = st.columns([7, 3])
 
@@ -123,10 +123,10 @@ with col2:
         )
 
 # --- Handle cancelled change after rerun ---
-if st.session_state.cancelled_change:
-    st.session_state.cancelled_change = False
-    st.session_state.selectbox_exercici = st.session_state.selected
-    st.rerun()
+#if st.session_state.cancelled_change:
+#    st.session_state.cancelled_change = False
+#    st.session_state.selectbox_exercici = st.session_state.selected
+#    st.rerun()
 
 # Si detectem un canvi d'exercici, demanem confirmació
 if f_enunciat_triat != st.session_state.selected:
@@ -141,7 +141,7 @@ if f_enunciat_triat != st.session_state.selected:
     with col2:
         if st.button("❌ No, no vull perdre el xat"):
             # Reverteix el selectbox a la selecció antiga
-            st.session_state.cancelled_change = True
+            #st.session_state.cancelled_change = True
             st.rerun()
     st.stop()  # atura execució fins que l'usuari decideixi
 
