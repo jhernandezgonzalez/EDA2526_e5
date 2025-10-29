@@ -1,0 +1,219 @@
+Exercici 5
+===========
+
+L'aeroport de Girona ens ha demanat un programa per gestionar els vols i
+el seu ús de les portes d'embarcament a la terminal. S'ha de gestionar
+una sèrie de vols, de cadascun dels quals sabem:
+
+-   la seva destinació (regional o internacional), i
+
+-   l'hora de sortida.
+
+També sabem que l'aeroport:
+
+-   disposa de 2 portes amb control de passaports (aptes per a vols
+    internacionals) i 3 més per a vols regionals.
+
+-   reserva la porta durant 60 minuts abans de la sortida de cada vol
+    per al seu servei.
+
+Hem de buscar una assignació de vols a portes (i horari) tenint en
+compte que:
+
+-   els vols internacionals només es podran embarcar des d'una porta amb
+    control de passaport. Els vols regionals poden operar-se des de
+    qualsevol porta.
+
+-   s'han d'assignar tots els vols a una porta d'embarcament compatible
+    (que estigui disponible i pugui operar el tipus de vol) fent servir
+    el **mínim nombre de portes possible**.
+
+Ens demanen un programa que faci aquesta assignació. Els hem comunicat
+que, donat la complexitat del problema, la solució òptima pot tenir un
+alt cost computacional. Ens demanen la **possibilitat de triar** una
+solució qualsevol vàlida, o buscar l'opció òptima.
+
+Característiques del programa
+-----------------------------
+
+Així, heu de fer un programa que:
+
+-   Rebi per paràmetre des de la terminal els valors que configuren el
+    problema:
+
+    -   -r: nombre de portes per a vols exclusivament regionals. Valor per
+        defecte, 3.
+
+    -   -i: nombre de portes amb control de passaport (necessari pels vols
+        internacionals). Valor per defecte, 2.
+
+    -   nom (i ruta) del fitxer de dades que es vol fer servir
+
+-   Llegeixi els vols del fitxer indicat. Vegeu-ne un exemple a la
+    Secció [3.2](#sec:dades){reference-type="ref"
+    reference="sec:dades"}.
+
+    Podeu fer els preprocessaments de les dades que necessiteu.
+
+-   Implementi, seguint les variants de l'esquema de *backtracking*, un
+    algoritme que torni una solució vàlida per al problema i un altre
+    que torni la solució òptima.
+
+    L'usuari podrà triar quin algoritme s'executa des de la terminal:
+
+-   per defecte (no caldrà passar cap opció), s'executarà l'algoritme
+    que torna **una solució vàlida** (la primera).
+
+-   -m: s'executarà l'algoritme que torna la **millor solució**.
+
+-   Mostri per pantalla la **distribució de vols** en portes proposta.
+    Vegeu-ne un exemple a la
+    Secció [3.3](#sec:sortida){reference-type="ref"
+    reference="sec:sortida"}.
+
+    També mostrareu el **temps de còmput** necessari per trobar la
+    solució.
+
+Lliurament
+==========
+
+El dia de l'entrega haureu de tenir el vostre programa a `bas.udg.edu`,
+preparat per compilar i executar. Això inclou:
+
+1.  el codi font (només fitxers `.cpp` i `.h`, res de fitxers objecte ni
+    executables)
+
+2.  els fitxers del joc de proves (veure
+    Sec. [3](#sec:jp){reference-type="ref" reference="sec:jp"}),
+
+3.  el fitxer `llegeix.me` on expliqueu quin objectiu té cada fitxer del
+    joc de proves (i qualsevol altre comentari que vulgueu fer sobre el
+    vostre codi).
+
+**IMPORTANT:** Cal que seguiu les instruccions sobre com lliurar les
+activitats de laboratori que teniu a Moodle. Assegureu-vos que ho feu
+com us demanem, sobretot les pre- i postcondicions tant a les classes
+com al `main`.
+
+Joc de proves i sortida {#sec:jp}
+=======================
+
+Cal que acompanyeu el vostre codi amb un joc de proves. En aquest cas,
+el joc de proves es redueix a diferents fitxers de dades. Com sempre, us
+donem un joc de proves bàsic que **heu de complementar**.
+
+El joc de proves que compartim a Moodle consta de 2 fitxers de dades.
+També hi trobareu les corresponents sortides possible. Vigileu perquè,
+també en aquest cas, segons com tracta el problema l'algoritme de
+*backtracking* que implementeu, la sortida que obteniu pot ser diferent
+a la que us donem. En el cas de l'algoritme que retorna una solució, la
+sortida pot ser molt diferent. En el cas de l'algoritme que retorna la
+millor solució, aquesta també pot ser diferent a la que us donem però ha
+de ser equivalent d'acord amb el criteri d'optimització (mateix nombre
+de portes).
+
+A continuació reproduim el funcionament bàsic del programa, el contingut
+de `volsCurt.txt` i la sortida de la nostra implementació dels
+algoritmes de *backtracking* corresponent.
+
+Funcionament bàsic
+------------------
+
+``` {style="codibash"}
+$ ./e5
+Falten arguments ("e5 --help" per ajuda)
+```
+
+``` {style="codibash"}
+$ ./e5 --help
+¡Ú¡s: ./e5 [-h] | [-m] [-r <int>] [-i <int>] fitxer
+
+opcio pot ser:
+  -h, --help      mostra aquest missatge d'ajuda i surt
+
+  -m              cerca la soluci¡ó¡ que minimitza el nombre de portes
+  -r <int>        indica el nombre de portes de tipus regional disponibles
+  -i <int>        indica el nombre de portes internacionals disponibles
+
+fitxer           fitxer de text amb tots els vols i altres dades requerides
+```
+
+``` {style="codibash"}
+$ ./e5 -r -i 3
+Error: El valor associat a l'opci¡ó¡ '-r' ¡é¡s incorrecte.
+```
+
+``` {style="codibash"}
+$ ./e5 -r 2
+Error: Falta el nom del fitxer.
+```
+
+``` {style="codibash"}
+$ ./e5 -r 2 noexisteix.txt
+Error: El fitxer [noexisteix.txt] no es pot obrir. Repassa el nom i permisos.
+```
+
+Fitxer de proves: `volsCurt.txt` {#sec:dades}
+--------------------------------
+    id  tipus   hora
+    1   i   07:30
+    2   r   07:45
+    3   r   08:30
+    4   r   09:00
+    5   i   09:30
+    6   i   10:00
+    7   r   10:15
+    8   i   11:00
+    9   i   11:30
+    10  r   11:30
+    11  i   12:45
+    12  r   13:30
+    13  i   13:45
+
+Podeu reaprofitar el codi de `eines.h` per llegir aquestes dades (el
+separador és el tabulador, '\\t').
+
+Execució amb: `volsCurt.txt` {#sec:sortida}
+----------------------------
+
+``` {style="codibash"}
+$ ./e5 volsCurt.txt
+==> 13 vols llegits.
+
+*************************
+* Porta 1 (REG): 4 vols *
+*-----------------------*
+* Vol:  1 [07:30] REG   *
+* Vol:  6 [10:00] REG   *
+* Vol:  8 [11:15] REG   *
+* Vol: 11 [12:45] REG   *
+*************************
+
+*************************
+* Porta 2 (REG): 3 vols *
+*-----------------------*
+* Vol:  2 [07:45] REG   *
+* Vol:  7 [10:15] REG   *
+* Vol: 12 [13:30] REG   *
+*************************
+
+*************************
+* Porta 3 (INT): 4 vols *
+*-----------------------*
+* Vol:  3 [08:45] INT   *
+* Vol:  5 [09:45] INT   *
+* Vol:  9 [11:30] INT   *
+* Vol: 13 [13:45] INT   *
+*************************
+
+*************************
+* Porta 4 (INT): 2 vols *
+*-----------------------*
+* Vol:  4 [09:00] INT   *
+* Vol: 10 [11:30] INT   *
+*************************
+
+Num. portes: 4 (INT.: 2)
+Temps: 0.000292767 segons
+```
+

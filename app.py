@@ -6,18 +6,54 @@ from pypdf import PdfReader
 # --- Configuració ---
 st.set_page_config(page_title="EDA: el teu assistent de laboratori", page_icon="🎓")
 
-# --- Carregar PDF ---
+# --- Carregar Enunciat ---
 def llegir_pdf(path_pdf: str) -> str:
-    reader = PdfReader(path_pdf)
-    textos = []
-    for page in reader.pages:
-        text = page.extract_text()
-        if text:
-            textos.append(text)
-    return "\n\n".join(textos)
+    """Llegeix tot el text d'un PDF."""
+    try:
+        reader = PdfReader(path_pdf)
+        textos = []
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                textos.append(text)
+        return "\n\n".join(textos)
+    except Exception as e:
+        return f"Error en llegir el PDF: {e}"
 
-PDF_PATH = "EDA2526_e5.pdf"
-ENUNCIAT = llegir_pdf(PDF_PATH) if os.path.exists(PDF_PATH) else "Error: No s'ha trobat el PDF amb l'enunciat!"
+def llegir_txt(path_txt: str) -> str:
+    """Llegeix el contingut d'un fitxer de text."""
+    try:
+        with open(path_txt, "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception as e:
+        return f"Error en llegir el TXT: {e}"
+
+def busca_enunciats(carpeta: str):
+    """Escaneja la carpeta i retorna una llista d'enunciats disponibles."""
+    if not os.path.exists(carpeta):
+        os.makedirs(carpeta)
+        return []
+    fitxers = os.listdir(carpeta)
+    # Agrupa per nom base (ex: EDA2526_e5.pdf i EDA2526_e5.txt -> 'EDA2526_e5')
+    noms_base = sorted({os.path.splitext(f)[0] for f in fitxers})
+    return noms_base
+
+def llegir_enunciat(carpeta: str, nom_base: str) -> str:
+    """Retorna el text d'un enunciat, prioritzant el .txt sobre el .pdf."""
+    path_txt = os.path.join(carpeta, f"{nom_base}.txt")
+    path_pdf = os.path.join(carpeta, f"{nom_base}.pdf")
+    if os.path.exists(path_txt):
+        return llegir_txt(path_txt)
+    elif os.path.exists(path_pdf):
+        return llegir_pdf(path_pdf)
+    else:
+        return f"Error: no s'ha trobat cap fitxer per a '{nom_base}'."
+
+carpeta = "./enunciats"
+
+'''PDF_PATH = "EDA2526_e5.pdf"
+ENUNCIAT = llegir_pdf(PDF_PATH) if os.path.exists(PDF_PATH) else "Error: No s'ha trobat el PDF amb l'enunciat!"'''
+
 
 # --- Configura el model ---
 MODEL = "llama-3.3-70b-versatile"
@@ -46,9 +82,61 @@ def get_answer(prompt):
     data = response.json()
     return data["choices"][0]["message"]["content"]
 
-# --- Interfície Streamlit ---
-st.title("Assistent de laboratori d'EDA")
-st.write("Fes-me preguntes sobre l'exercici. T'explicaré el que necessitis, t'ajudaré a entendre què es demana i et donaré explicacions conceptuals i pistes.")
+
+
+# ------------------------------
+# ---- Interfície Streamlit ----
+# ------------------------------
+st.title("Assistent de laboratori d'EDA 25/26")
+st.write("Fes-me preguntes sobre l'exercici triat. T'explicaré el que necessitis, t'ajudaré a entendre què es demana i et donaré explicacions conceptuals i pistes.")
+
+# Selecció d’enunciat
+f_enunciats = busca_enunciats(carpeta)
+if not f_enunciats:
+    st.warning(f"No s'ha trobat cap enunciat a la carpeta {carpeta}")
+    st.stop()
+
+# Deixar a l'alumne triar l'exercici sobre el qual vol xatejar
+# Per defecte, el primer del llistat
+f_enunciat_actual = st.session_state.get("selected", f_enunciats[0])
+f_enunciat_triat = st.selectbox("Selecciona l'exercici:", f_enunciats,
+                                    index=f_enunciats.index(f_enunciat_actual))
+
+# Si detectem un canvi d'exercici, demanem confirmació
+if f_enunciat_triat != f_enunciat_actual:
+    st.warning(f"Vols canviar a l'{f_enunciat_triat}?\n"
+               f"El xat actual sobre l'{f_enunciat_actual} **s'eliminarà completament**.")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("✅ Sí, canvia de pràctica"):
+            st.session_state.selected = f_enunciat_triat
+            st.session_state.history = []
+            st.rerun()
+    with col2:
+        if st.button("❌ No, no vull perdre el xat"):
+            # Reverteix el selectbox a la selecció antiga
+            st.session_state.selected = f_enunciat_actual
+            st.rerun()
+    st.stop()  # atura execució fins que l'usuari decideixi
+else:
+    # Actualitza la selecció actual si no hi ha canvi
+    st.session_state.selected = f_enunciat_actual
+
+
+# Carrega el contingut de l’enunciat per al xatbot
+ENUNCIAT = llegir_enunciat(carpeta, st.session_state.selected)
+
+# Dona la possibilitat a l'alumne de descarregar des d'aquí l'enunciat
+if os.path.exists(os.path.join(carpeta, f"{st.session_state.selected}.pdf")):
+    with open(os.path.join(carpeta, f"{st.session_state.selected}.pdf"), "rb") as f:
+        pdf_bytes = f.read()
+    st.download_button(
+        label="Descarrega aquí l'enunciat",
+        data=pdf_bytes,
+        file_name=f"{st.session_state.selected}.pdf",
+        mime="application/pdf",
+    )
+
 
 # --- Estat ---
 if "history" not in st.session_state:
@@ -60,7 +148,7 @@ if user_input:
     # Construïm el prompt amb l’enunciat i la conversa anterior
     context = "\n".join([f"{r['role']}: {r['content']}" for r in st.session_state.history[-4:]])
     prompt = (
-        f"ENUNCIAT DE LA PRÀCTICA:\n{ENUNCIAT}\n\n"
+        f"ENUNCIAT:\n{ENUNCIAT}\n\n"
         f"CONVERSA ANTERIOR:\n{context}\n\n"
         f"ALUMNE: {user_input}\nASSISTENT:"
     )
