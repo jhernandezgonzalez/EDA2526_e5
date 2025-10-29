@@ -97,19 +97,10 @@ if not f_enunciats:
 if "selected" not in st.session_state:
     st.session_state.selected = f_enunciats[0]
 
-#if "restore_to" not in st.session_state:
-#    st.session_state.restore_to = None
-
+# Això ens permet si hem d'actualitzar el selectbox
+# perquè l'usuari ha cancel·lat el canvi d'exercici
 if "selectbox_version" not in st.session_state:
     st.session_state.selectbox_version = 0
-
-#if st.session_state.get("restore_to") is not None:
-#    # assegurem que la selecció "visual" serà l'antiga
-#    initial_selected = st.session_state.restore_to
-#    st.session_state.restore_to = None
-#else:
-#    initial_selected = st.session_state.selected
-
 
 
 col1, col2 = st.columns([7, 3])
@@ -125,7 +116,7 @@ with col2:
     if os.path.exists(os.path.join(carpeta, f"{st.session_state.selected}.pdf")):
         with open(os.path.join(carpeta, f"{st.session_state.selected}.pdf"), "rb") as f:
             pdf_bytes = f.read()
-        st.write("")
+        st.markdown("<div style='height: 1.6em;'></div>", unsafe_allow_html=True)
         st.download_button(
             label="Descarrega l'enunciat",
             data=pdf_bytes,
@@ -133,12 +124,6 @@ with col2:
             mime="application/pdf",
             use_container_width=True
         )
-
-# --- Handle cancelled change after rerun ---
-#if st.session_state.cancelled_change:
-#    st.session_state.cancelled_change = False
-#    st.session_state.selectbox_exercici = st.session_state.selected
-#    st.rerun()
 
 # Si detectem un canvi d'exercici, demanem confirmació
 if f_enunciat_triat != st.session_state.selected:
@@ -152,18 +137,11 @@ if f_enunciat_triat != st.session_state.selected:
             st.rerun()
     with col2:
         if st.button("❌ No, no vull perdre el xat"):
-            # Reverteix el selectbox a la selecció antiga
-            #st.session_state.cancelled_change = True
+            # Ajuda a actualitzar el selectbox a la selecció antiga
             st.session_state.selectbox_version += 1
             st.rerun()
     st.stop()  # atura execució fins que l'usuari decideixi
 
-# Reiniciem el selectbox al valor anterior (no s'ha canviat)
-#if st.session_state.get("cancelled_change", False):
-#    st.session_state.cancelled_change = False
-    # Force restoring the old selection visually
-#    st.session_state.selectbox_exercici = st.session_state.selected
-#    st.rerun()
 
 
 
