@@ -123,10 +123,10 @@ with col2:
         )
 
 # --- Handle cancelled change after rerun ---
-#if st.session_state.cancelled_change:
-#    st.session_state.cancelled_change = False
-#    st.session_state.selectbox_exercici = st.session_state.selected
-#    st.rerun()
+if st.session_state.cancelled_change:
+    st.session_state.cancelled_change = False
+    st.session_state.selectbox_exercici = st.session_state.selected
+    st.rerun()
 
 # Si detectem un canvi d'exercici, demanem confirmació
 if f_enunciat_triat != st.session_state.selected:
@@ -146,11 +146,11 @@ if f_enunciat_triat != st.session_state.selected:
     st.stop()  # atura execució fins que l'usuari decideixi
 
 # Reiniciem el selectbox al valor anterior (no s'ha canviat)
-if st.session_state.get("cancelled_change", False):
-    st.session_state.cancelled_change = False
+#if st.session_state.get("cancelled_change", False):
+#    st.session_state.cancelled_change = False
     # Force restoring the old selection visually
-    st.session_state.selectbox_exercici = st.session_state.selected
-    st.rerun()
+#    st.session_state.selectbox_exercici = st.session_state.selected
+#    st.rerun()
 
 
 
