@@ -97,6 +97,8 @@ if not f_enunciats:
 if "selected" not in st.session_state:
     st.session_state.selected = f_enunciats[0]
 
+if "cancelled_change" not in st.session_state:
+    st.session_state.cancelled_change = False
 
 col1, col2 = st.columns([7, 3])
 
@@ -117,7 +119,14 @@ with col2:
             data=pdf_bytes,
             file_name=f"{st.session_state.selected}.pdf",
             mime="application/pdf",
+            use_container_width=True
         )
+
+# --- Handle cancelled change after rerun ---
+#if st.session_state.cancelled_change:
+#    st.session_state.cancelled_change = False
+#    st.session_state.selectbox_exercici = st.session_state.selected
+#    st.rerun()
 
 # Si detectem un canvi d'exercici, demanem confirmació
 if f_enunciat_triat != st.session_state.selected:
