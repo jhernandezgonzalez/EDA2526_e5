@@ -132,10 +132,18 @@ if f_enunciat_triat != st.session_state.selected:
     with col2:
         if st.button("❌ No, no vull perdre el xat"):
             # Reverteix el selectbox a la selecció antiga
-            st.session_state.selectbox_exercici = st.session_state.selected
+            st.session_state.cancelled_change = True
             st.experimental_rerun()
             st.rerun()
     st.stop()  # atura execució fins que l'usuari decideixi
+
+# Reiniciem el selectbox al valor anterior (no s'ha canviat)
+if st.session_state.get("cancelled_change", False):
+    st.session_state.cancelled_change = False
+    # Force restoring the old selection visually
+    st.session_state.selectbox_exercici = st.session_state.selected
+    st.experimental_rerun()
+
 
 
 # Carrega el contingut de l’enunciat per al xatbot
