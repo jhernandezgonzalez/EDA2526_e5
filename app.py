@@ -98,7 +98,7 @@ if "selected" not in st.session_state:
     st.session_state.selected = f_enunciats[0]
 
 
-col1, col2 = st.columns([3, 1])
+col1, col2 = st.columns([7, 3])
 
 with col1:
     # Dona la possibilitat a l'alumne de triar l'exercici
@@ -112,7 +112,7 @@ with col2:
         with open(os.path.join(carpeta, f"{st.session_state.selected}.pdf"), "rb") as f:
             pdf_bytes = f.read()
         st.download_button(
-            label="Descarrega aquí l'enunciat",
+            label="Descarrega l'enunciat",
             data=pdf_bytes,
             file_name=f"{st.session_state.selected}.pdf",
             mime="application/pdf",
