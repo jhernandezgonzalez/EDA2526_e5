@@ -94,17 +94,37 @@ if not f_enunciats:
 
 # Deixar a l'alumne triar l'exercici sobre el qual vol xatejar
 # Per defecte, el primer del llistat
-f_enunciat_actual = st.session_state.get("selected", f_enunciats[0])
-f_enunciat_triat = st.selectbox("Selecciona l'exercici:", f_enunciats,
-                                    index=f_enunciats.index(f_enunciat_actual))
+if "selected" not in st.session_state:
+    st.session_state.selected = f_enunciats[0]
+
+
+col1, col2 = st.columns([3, 1])
+
+with col1:
+    # Dona la possibilitat a l'alumne de triar l'exercici
+    f_enunciat_triat = st.selectbox("Selecciona l'exercici:",
+                                    f_enunciats,
+                                    index=f_enunciats.index(st.session_state.selected),
+                                    key="selectbox_exercici")
+with col2:
+    # Dona la possibilitat a l'alumne de descarregar des d'aquí l'enunciat
+    if os.path.exists(os.path.join(carpeta, f"{st.session_state.selected}.pdf")):
+        with open(os.path.join(carpeta, f"{st.session_state.selected}.pdf"), "rb") as f:
+            pdf_bytes = f.read()
+        st.download_button(
+            label="Descarrega aquí l'enunciat",
+            data=pdf_bytes,
+            file_name=f"{st.session_state.selected}.pdf",
+            mime="application/pdf",
+        )
 
 # Si detectem un canvi d'exercici, demanem confirmació
-if f_enunciat_triat != f_enunciat_actual:
+if f_enunciat_triat != st.session_state.selected:
     st.warning(f"Vols canviar a l'{f_enunciat_triat}?\n"
-               f"El xat actual sobre l'{f_enunciat_actual} **s'eliminarà completament**.")
+               f"El xat actual sobre l'{st.session_state.selected} **s'eliminarà completament**.")
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("✅ Sí, canvia de pràctica"):
+        if st.button("✅ Sí, canvia d'exercici"):
             st.session_state.selected = f_enunciat_triat
             st.session_state.history = []
             st.rerun()
@@ -112,26 +132,16 @@ if f_enunciat_triat != f_enunciat_actual:
         if st.button("❌ No, no vull perdre el xat"):
             # Reverteix el selectbox a la selecció antiga
             st.session_state.selected = f_enunciat_actual
+            st.session_state.selectbox_exercici = st.session_state.selected
+            st.experimental_rerun()
             st.rerun()
     st.stop()  # atura execució fins que l'usuari decideixi
-else:
-    # Actualitza la selecció actual si no hi ha canvi
-    st.session_state.selected = f_enunciat_actual
 
 
 # Carrega el contingut de l’enunciat per al xatbot
 ENUNCIAT = llegir_enunciat(carpeta, st.session_state.selected)
 
-# Dona la possibilitat a l'alumne de descarregar des d'aquí l'enunciat
-if os.path.exists(os.path.join(carpeta, f"{st.session_state.selected}.pdf")):
-    with open(os.path.join(carpeta, f"{st.session_state.selected}.pdf"), "rb") as f:
-        pdf_bytes = f.read()
-    st.download_button(
-        label="Descarrega aquí l'enunciat",
-        data=pdf_bytes,
-        file_name=f"{st.session_state.selected}.pdf",
-        mime="application/pdf",
-    )
+
 
 
 # --- Estat ---
