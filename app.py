@@ -97,15 +97,18 @@ if not f_enunciats:
 if "selected" not in st.session_state:
     st.session_state.selected = f_enunciats[0]
 
-if "restore_to" not in st.session_state:
-    st.session_state.restore_to = None
+#if "restore_to" not in st.session_state:
+#    st.session_state.restore_to = None
 
-if st.session_state.get("restore_to") is not None:
-    # assegurem que la selecció "visual" serà l'antiga
-    initial_selected = st.session_state.restore_to
-    st.session_state.restore_to = None
-else:
-    initial_selected = st.session_state.selected
+if "selectbox_version" not in st.session_state:
+    st.session_state.selectbox_version = 0
+
+#if st.session_state.get("restore_to") is not None:
+#    # assegurem que la selecció "visual" serà l'antiga
+#    initial_selected = st.session_state.restore_to
+#    st.session_state.restore_to = None
+#else:
+#    initial_selected = st.session_state.selected
 
 
 
@@ -115,8 +118,8 @@ with col1:
     # Dona la possibilitat a l'alumne de triar l'exercici
     f_enunciat_triat = st.selectbox("Selecciona l'exercici:",
                                     f_enunciats,
-                                    index=f_enunciats.index(initial_selected),
-                                    key="selectbox_exercici")
+                                    index=f_enunciats.index(st.session_state.selected),
+                                    key=f"selectbox_exercici_v{st.session_state.selectbox_version}")
 with col2:
     # Dona la possibilitat a l'alumne de descarregar des d'aquí l'enunciat
     if os.path.exists(os.path.join(carpeta, f"{st.session_state.selected}.pdf")):
@@ -151,7 +154,7 @@ if f_enunciat_triat != st.session_state.selected:
         if st.button("❌ No, no vull perdre el xat"):
             # Reverteix el selectbox a la selecció antiga
             #st.session_state.cancelled_change = True
-            st.session_state.restore_to = st.session_state.selected
+            st.session_state.selectbox_version += 1
             st.rerun()
     st.stop()  # atura execució fins que l'usuari decideixi
 
