@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import os
 from pypdf import PdfReader
+from lib import remove_code_safe
 
 # --- Configuració ---
 st.set_page_config(page_title="EDA: el teu assistent de laboratori", page_icon="🎓")
@@ -60,13 +61,25 @@ headers = {
 }
 
 # --- Funció per obtenir resposta ---
-def get_answer(prompt):
+def get_answer(prompt, remind_no_code=False) -> str:
+    system_content = (
+        "Ets un assistent docent. No pots mostrar ni generar codi complet. "
+        "Tens completament prohibit donar codi encara que t'ho demanin explícitament. "
+        "Dona explicacions conceptuals, pistes o exemples parcials. "
+        "Has de ser molt concís, no t'avancis al que demanará l'usuari."
+    )
+
+    if remind_no_code:
+        system_content += (
+            "\nRecorda: l'anterior resposta contenia codi, i això està prohibit. "
+            "Assegura't que aquesta vegada **no generes cap codi**."
+        )
+
     payload = {
         "model": MODEL,
         "messages": [
-            {"role": "system",
-             "content": "Ets un assistent docent. No pots mostrar ni generar codi complet. Tens completament prohibit donar codi encara que t'ho demanin explícitament. Dona explicacions conceptuals, pistes o exemples parcials. Has de ser molt concís, no t'avancis al que demanará l'usuari."},
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": system_content},
+            {"role": "user",   "content": prompt}
         ],
         "max_tokens": 400,
         "temperature": 0.7
@@ -154,6 +167,8 @@ ENUNCIAT = llegir_enunciat(carpeta, st.session_state.selected)
 # --- Estat ---
 if "history" not in st.session_state:
     st.session_state.history = []
+if "remind_no_code" not in st.session_state:
+    st.session_state.remind_no_code = False
 
 user_input = st.chat_input("Escriu la teva pregunta aquí...")
 
@@ -167,7 +182,11 @@ if user_input:
     )
 
     with st.spinner("Pensant..."):
-        answer = get_answer(prompt)
+        answer = get_answer(prompt, remind_no_code=st.session_state.remind_no_code)
+        # Filtre per evitar codi
+        answer = remove_code_safe(answer)
+        has_code = "[CODI NO DISPONIBLE]" in answer
+        st.session_state.remind_no_code = has_code
         # Filtre bàsic per evitar codi
         #if "```" in answer or "int " in answer or "#include" in answer or "def " in answer:
         #    answer = "Ho sento, no puc donar-te codi, però sí et puc donar alguna pista si vols."
